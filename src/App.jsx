@@ -1,53 +1,99 @@
 import React, { useEffect, useState } from 'react';
-import { createBrowserRouter, RouterProvider } from 'react-router-dom';
+import {
+  createBrowserRouter,
+  RouterProvider,
+} from "react-router-dom";
+
+import BookPage from './pages/bookPage';
+import PayPage from './pages/payment';
+import HomePage from './pages/homePage';
 import LoginPage from './pages/auth/login';
-import { useDispatch } from 'react-redux';
-import { isLogin } from './redux/login/action';
-import { refesh } from './service/api';
 import SignUpPage from './pages/auth/register';
-import AdminHomePage from './pages/admin/adminHomePage';
-import UserPage from './pages/admin/outlet/user page/users';
+import BookDetailPage from './pages/bookDetailPage';
+import { refeshToken } from './service/api';
+import { useDispatch, useSelector } from 'react-redux';
+import { isLogin } from './redux/login/action';
+import loginReducer from './redux/login/asscess';
+import AdminPage from './pages/auth/adminPage';
+import TableUser from './component/admin/tableUser';
+import TableBook from './component/admin/tableBook';
+import ViewOrder from './pages/viewOrder';
+import Dashboard from './component/admin/dashboard';
+import TableOrder from './component/admin/ordeTable';
 
-const App = () => {
-  const dispatch = useDispatch();
+export default function App() {
+  const dispatch = useDispatch()
 
-  const fetchData = async () => {
-    try {
-      const refesht = await refesh();
-      if (refesht && refesht.data) {
-        dispatch(isLogin(refesht.data));
-      } else {
-        throw new Error('Refresh failed: No data returned');
-      }
-    } catch (error) {
-      console.error('Refresh failed. Retrying...', error);
 
-    }
-  };
+  const getInfo = async () => {
+    const token = await refeshToken()
+    dispatch(isLogin(token.data.user))
 
+  }
   useEffect(() => {
-    fetchData();
-  }, []);
+
+    getInfo()
+
+  }, [])
 
   const router = createBrowserRouter([
     {
-      path: '/login',
-      element: <LoginPage />,
-    },
-    {
-      path: '/signUp',
-      element: <SignUpPage />,
-    },
-    {
-      path: '/adminPage',
-      element: <AdminHomePage />,
+      path: "",
+      element: <div>
+        <HomePage></HomePage>
+      </div>,
       children: [
         {
-          path: 'users',
-          element: <UserPage />,
+          path: '/',
+          element: <BookPage />
+
         },
-      ],
+
+      ]
     },
+
+    {
+      path: '/book-detail/:id',
+      element: <BookDetailPage />
+    },
+    {
+      path: "/login",
+      element: <LoginPage></LoginPage>,
+    },
+    {
+      path: '/payment',
+      element: <PayPage />
+    },
+    {
+      path: "/sign-up",
+      element: <SignUpPage></SignUpPage>,
+    },
+    {
+      path: "/admin",
+      element: <AdminPage></AdminPage>,
+      children: [
+        {
+          path: 'user',
+          element: <TableUser></TableUser>
+        },
+        {
+          path: 'book',
+          element: <TableBook></TableBook>
+        },
+        {
+          path: 'dashboard',
+          element: <Dashboard></Dashboard>
+        },
+        {
+          path: 'order',
+          element: <TableOrder></TableOrder>
+        },
+      ]
+    },
+    {
+      path: '/history',
+      element: <ViewOrder></ViewOrder>
+    }
   ]);
 
   return (
@@ -55,6 +101,4 @@ const App = () => {
       <RouterProvider router={router} />
     </React.StrictMode>
   );
-};
-
-export default App;
+}

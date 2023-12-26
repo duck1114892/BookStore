@@ -1,31 +1,46 @@
 import { Button, Checkbox, Form, Input, Layout, message, notification } from "antd"
 import { Content, Footer, Header } from "antd/es/layout/layout";
 import '../../styles/reset.css'
+// import '/public/scss/login.css'
 import { loginApi } from "../../service/api";
+import { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
+import { store } from "../../redux/store";
 import { Link, useNavigate } from "react-router-dom";
-import { useDispatch, useSelector } from "react-redux";
-import instance from "../../utils/axios-customsize";
-const LoginPage = () => {
 
+const LoginPage = () => {
+    const [emailValue, setEmailValue] = useState('')
+    const [passwordValue, setPasswordValue] = useState('')
+    const useNagi = useNavigate()
     const onFinish = async (values) => {
         const data = await loginApi(values.username, values.password)
 
         if (data.statusCode === 201) {
-            console.log(data)
             message.success(`Xin Chào ${data.data.user.email}`)
             localStorage.setItem('access_token', data.data.access_token)
-
+            useNagi('/')
+            window.location.reload()
         }
         else {
-
+            message.error(data.message)
         }
-
-
     };
     const onFinishFailed = (errorInfo) => {
 
     };
-    console.log(useSelector(state => state.loginReducer))
+    const emailState = useSelector(state => state.rootReducer.email)
+    const passwordState = useSelector(state => state.rootReducer.password)
+
+
+    useEffect(() => {
+        setEmailValue(emailState);
+        setPasswordValue(passwordState);
+    }, [emailState, passwordState]);
+
+    const initialValues = {
+        username: emailValue,
+        password: passwordValue
+    };
     return (
         <Layout style={{ minHeight: '100vh' }} >
             <Header style={{
@@ -59,7 +74,10 @@ const LoginPage = () => {
                         alignItems: 'center'
 
                     }}
-
+                    defaultValue={{
+                        username: emailValue,
+                        password: passwordValue
+                    }}
 
                     onFinish={onFinish}
                     onFinishFailed={onFinishFailed}
@@ -94,7 +112,7 @@ const LoginPage = () => {
                         ]}
                     >
 
-                        <Input.Password className="input" />
+                        <Input.Password className="input" value={passwordValue} />
                     </Form.Item>
 
                     <Form.Item
@@ -106,7 +124,7 @@ const LoginPage = () => {
                     </Form.Item>
                 </Form>
             </Content>
-            <Footer style={{ color: 'black' }}>Bạn Chưa Có Tài Khoản ? <Link to='/signUp' relative="path">Đăng Ký</Link></Footer>
+            <Footer style={{ color: 'black' }}>Bạn Chưa Có Tài Khoản ? <Link to='/sign-up' relative="path">Đăng Ký</Link></Footer>
         </Layout>
     )
 }

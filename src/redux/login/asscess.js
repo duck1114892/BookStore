@@ -2,25 +2,19 @@ const initialState = {
     isAuth: false,
     user: {
         email: "",
-        name: "",
+        phone: "",
+        fullName: "",
         role: "",
+        avatar: "",
         id: ""
     }
 }
 const loginReducer = (state = initialState, action) => {
     switch (action.type) {
+
         case 'LOGIN':
-            const getUser = action.payload
-            console.log(getUser)
-            return {
-                ...state, isAuth: true, user: {
-                    email: getUser.email,
-                    name: getUser.name,
-                    id: getUser._id,
-                    role: getUser.role.name,
-                    permissions: getUser.permission
-                }
-            }
+
+            return { ...state, isAuth: true, user: action.payload }
         default: return state
     }
 
